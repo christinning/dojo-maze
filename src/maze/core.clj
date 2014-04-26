@@ -5,7 +5,7 @@
 (def start-square \I)
 (def non-wall \.)
 (def wall \#)
-(def visited-square \V)
+(def visitable-square? #{start-square non-wall exit-square})
 
 (def moves
   {[0 -1] :N
@@ -44,17 +44,16 @@
   (map #(vec (map + loc %))
        (keys moves)))
 
-(defn valid-location
-  [maze loc]
-  (let [current-loc (get-in maze loc)]
-    (or (= current-loc exit-square)
-        (= current-loc non-wall)
-        (= current-loc start-square))))
-
-(defn valid-neighbours
-  [maze loc]
-  (filter (partial valid-location maze)
-              (neighbours loc)))
+(defn extend-path
+  "Returns all the paths possible as the next step for the path provided.
+  Only goes to valid squares that have not already been visited by path"
+  [maze path]
+  (let [valid-location? (fn [loc] (visitable-square? (get-in maze loc)))
+        not-visited? (fn [loc]
+                         (not-any? #(= % loc) path))]
+    (map #(conj path %)
+         (filter (every-pred valid-location? not-visited?)
+                               (neighbours (last path))))))
 
 ;;TODO: update to do breadth first and only return first path
 (defn walk
@@ -63,10 +62,10 @@
     (if (= (get-in maze loc) exit-square)
       [path]
       (mapcat
-        (fn [next-loc]
-          (walk (assoc-in maze loc visited-square)
-                (conj path next-loc)))
-        (valid-neighbours maze loc)))))
+        (partial walk maze)
+        (extend-path maze path)))))
+
+
 
 (defn solve-maze
   [str-maze]
