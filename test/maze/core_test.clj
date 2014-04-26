@@ -42,6 +42,8 @@
            [:S :W :W :W])))
     (is (= (-> simple lazy-solve second)
            [:S :S :W :N :W :W]))
+    (is (= (-> simple lazy-solve count)
+           2))
   (testing "Complex maze"
     (is (= (-> complex lazy-solve first)
            [:S :E :E :S :S :S :S :E :S :S :E :E :N :N :N :N :W :N :N :E])))
