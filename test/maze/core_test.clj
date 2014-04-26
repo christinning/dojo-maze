@@ -21,10 +21,30 @@
        "###.###\n"
        ))
 
+(def lots-of-solutions
+  (str "I..O\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"
+       "....\n"))
+
+
 (deftest can-get-path
   (testing "Simple maze"
-    (is (= (solve-maze simple)
+    (is (= (-> simple lazy-solve first)
            [:S :W :W :W])))
+    (is (= (-> simple lazy-solve second)
+           [:S :S :W :N :W :W]))
   (testing "Complex maze"
-    (is (= (solve-maze complex)
-           [:S :E :E :S :S :S :S :E :S :S :E :E :N :N :N :N :W :N :N :E]))))
+    (is (= (-> complex lazy-solve first)
+           [:S :E :E :S :S :S :S :E :S :S :E :E :N :N :N :N :W :N :N :E])))
+  (testing "Lots of options"
+    (is (= (-> lots-of-solutions lazy-solve first)
+           [:E :E :E]))))

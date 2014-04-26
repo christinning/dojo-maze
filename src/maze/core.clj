@@ -55,7 +55,6 @@
          (filter (every-pred valid-location? not-visited?)
                                (neighbours (last path))))))
 
-;;TODO: update to do breadth first and only return first path
 (defn walk
   [maze path]
   (let [loc (last path)]
@@ -65,14 +64,26 @@
         (partial walk maze)
         (extend-path maze path)))))
 
+(defn lazy-walk
+  [maze paths]
+  (if (empty? paths)
+    []
+    (let [not-at-exit? (fn [path] (not= exit-square (get-in maze (last path))))
+          [checked [at-exit & unchecked]] (split-with not-at-exit? paths)
+          new-tail (concat unchecked (mapcat (partial extend-path maze) checked))]
+      (if at-exit
+        (cons at-exit (lazy-seq (lazy-walk maze new-tail)))
+        (recur maze new-tail)))))
 
-
-(defn solve-maze
+(defn solve
   [str-maze]
   (let [maze (to-maze str-maze)
         start (start-location maze)]
-    (path-to-directions(first (sort-by count (walk maze [start]))))))
+    (map path-to-directions (walk maze [start]))))
 
-
-
+(defn lazy-solve
+  [str-maze]
+  (let [maze (to-maze str-maze)
+        start (start-location maze)]
+    (map path-to-directions (lazy-walk maze [[start]]))))
 
